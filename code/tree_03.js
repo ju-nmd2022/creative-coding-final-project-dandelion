@@ -5,6 +5,7 @@ let maxGrowth = 100;
 
 function setup() {
   createCanvas(800, 400);
+  frameRate(60);
 }
 
 function draw() {
