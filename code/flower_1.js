@@ -41,6 +41,7 @@ function draw() {
 
     // Draw flower petals
     if (bloom) {
+      noStroke();
       fill(255, 192, 203); // Pink color for petals
       for (let i = 0; i < 8; i++) {
         let angle = (TWO_PI / 8) * i;
