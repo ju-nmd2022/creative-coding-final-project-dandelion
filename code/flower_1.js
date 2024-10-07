@@ -1,63 +1,66 @@
-let stemHeight = 0;
-let petalSize = 0;
-let bloom = false;
-let started = false; // Variable to check if the growth has started
+let flowers = [];
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(800, 400);
   frameRate(60);
 }
 
 function draw() {
   background(220);
 
-  // Draw seed
-  if (stemHeight === 0 && petalSize === 0 && !started) {
-    fill(139, 69, 19);
-    ellipse(width / 2, height - 20, 10, 10); // Seed
-  }
+  // Iterate through all flowers and update/draw them
+  for (let i = 0; i < flowers.length; i++) {
+    let flower = flowers[i];
 
-  // Grow the flower if it has started
-  if (started) {
     // Grow stem
-    if (stemHeight < 150) {
-      stemHeight += 1; // Increase stem height slowly
+    if (flower.stemHeight < flower.maxStemHeight) {
+      flower.stemHeight += 1; // Increase stem height slowly
     }
 
     // Draw stem
     stroke(34, 139, 34);
-    strokeWeight(4);
-    line(width / 2, height - 20, width / 2, height - 20 - stemHeight);
+    strokeWeight(4); // Thinner stem for smaller flowers
+    line(flower.x, height - 20, flower.x, height - 20 - flower.stemHeight);
 
     // Once the stem is fully grown, start growing petals
-    if (stemHeight >= 150) {
-      bloom = true;
+    if (flower.stemHeight >= flower.maxStemHeight) {
+      flower.bloom = true;
     }
 
     // Grow petals
-    if (bloom && petalSize < 50) {
-      petalSize += 0.5; // Increase petal size slowly
+    if (flower.bloom && flower.petalSize < 30) {
+      // Reduced max petal size to 30
+      flower.petalSize += 0.25; // Slower petal growth
     }
 
-    // Draw flower petals
-    if (bloom) {
+    // Draw flower petals with its own color
+    if (flower.bloom) {
       noStroke();
-      fill(255, 192, 203); // Pink color for petals
-      for (let i = 0; i < 8; i++) {
-        let angle = (TWO_PI / 8) * i;
-        let x = width / 2 + cos(angle) * petalSize;
-        let y = height - 20 - stemHeight + sin(angle) * petalSize;
-        ellipse(x, y, 30, 30); // Petals
+      fill(flower.color); // Use the flower's specific color
+      for (let j = 0; j < 8; j++) {
+        let angle = (TWO_PI / 8) * j;
+        let x = flower.x + cos(angle) * flower.petalSize * 0.5; // Bring petals closer to the center
+        let y =
+          height - 20 - flower.stemHeight + sin(angle) * flower.petalSize * 0.5; // Bring petals closer to the center
+        ellipse(x, y, 30); // Smaller petals with size 30
       }
 
       // Draw center of flower
-      fill(255, 215, 0); // Yellow for the center
-      ellipse(width / 2, height - 20 - stemHeight, 30, 30);
+      fill(255, 215, 0);
+      ellipse(flower.x, height - 20 - flower.stemHeight, 20); // Smaller center of flower
     }
   }
 }
 
-// Start growth when mouse is pressed
 function mousePressed() {
-  started = true;
+  let newFlower = {
+    x: random(50, width - 50), // Random X position for the flower
+    stemHeight: 0, // Starting stem height
+    maxStemHeight: random(50, 100), // Random maximum stem height for each flower (smaller range)
+    petalSize: 0, // Starting petal size
+    bloom: false, // Flower bloom status
+    color: color(random(255), random(255), random(255)), // Assign a random color
+  };
+
+  flowers.push(newFlower);
 }

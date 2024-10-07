@@ -2,7 +2,7 @@ let a = 50; // You can change the value of 'a' to manipulate the shape
 let scaleFactor = 150; // Scaling factor to adjust the size of the shape
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(500, 500);
   background(255);
   noLoop(); // Prevent continuous redrawing
 }
