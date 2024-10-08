@@ -64,7 +64,7 @@ class Cloud {
     this.y = y;
     this.cloudParts = [];
     this.createCloud();
-    this.timeToRain = random(300, 600); // Random time to start raining
+    this.timeToRain = random(100, 300); // Random time to start raining
   }
 
   createCloud() {

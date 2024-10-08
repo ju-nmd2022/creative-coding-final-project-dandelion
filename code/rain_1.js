@@ -103,7 +103,7 @@ class Cloud {
         let py = this.y + part.offsetY;
         raindrops.push(new Raindrop(px, py));
       }
-      this.timeToRain = random(300, 600); // Reset time for next rain event
+      this.timeToRain = random(100, 300); // Reset time for next rain event
     }
   }
 }
