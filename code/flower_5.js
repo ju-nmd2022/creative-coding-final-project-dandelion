@@ -36,7 +36,7 @@ function setup() {
 
   handpose.detectStart(video, getHandsData);
 
-  // Initialize the synth for music
+  // Initialize for music
   setupTone();
 
   // Create clouds
@@ -232,24 +232,24 @@ function playNextFlowerSound(time) {
   }
 }
 
-function mousePressed() {
-  if (Tone.context.state !== "running") {
-    Tone.start().then(() => {
-      console.log("Audio context started");
-    });
-  }
+// function mousePressed() {
+//   if (Tone.context.state !== "running") {
+//     Tone.start().then(() => {
+//       console.log("Audio context started");
+//     });
+//   }
 
-  let newFlower = {
-    x: random(50, width - 50),
-    stemHeight: 0,
-    maxStemHeight: random(50, 120),
-    petalSize: 0,
-    bloom: false,
-    color: color(random(255), random(255), random(255)),
-  };
+//   let newFlower = {
+//     x: random(50, width - 50),
+//     stemHeight: 0,
+//     maxStemHeight: random(50, 120),
+//     petalSize: 0,
+//     bloom: false,
+//     color: color(random(255), random(255), random(255)),
+//   };
 
-  flowers.push(newFlower);
-}
+//   flowers.push(newFlower);
+// }
 
 // Cloud class to handle cloud drawing and rain generation
 class Cloud {
