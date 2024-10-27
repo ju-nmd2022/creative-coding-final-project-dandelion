@@ -18,6 +18,7 @@ let flowerInterval = 2000;
 let synth, melodyInterval, lullabyLoop; // Tone.js elements
 const scale = ["C4", "D4", "E4", "G4", "A4"];
 let selectedMedianColor = null;
+let lastNoteTime = 0; // Initialize a variable to track the last note time
 function preload() {
   handpose = ml5.handPose();
 }
@@ -37,13 +38,13 @@ function setup() {
   initializeStars(200);
   lastSwipeTime = millis();
 }
-// Setup Tone.js synth and melody interval
 function setupTone() {
-  synth = new Tone.Synth(Tone.Synth, {
+  synth = new Tone.Synth({
     oscillator: { type: "sine" },
     envelope: { attack: 1, decay: 1, sustain: 0.5, release: 2 },
   }).toDestination();
-  melodyInterval = new Tone.Loop((time) => playNextFlowerSound(time), "4n");
+
+  melodyInterval = new Tone.Loop((time) => playNextFlowerSound(time), "4n"); // Ensure time is passed
   Tone.Transport.bpm.value = 60;
   melodyInterval.start(0);
 }
@@ -87,12 +88,23 @@ function addFlower() {
   });
 }
 function growAndDisplayFlower(flower) {
-  if (flower.stemHeight < flower.maxStemHeight) flower.stemHeight += 1;
+  // Remove the growth tone setup and volume control
+  if (flower.stemHeight < flower.maxStemHeight) {
+    flower.stemHeight += 1;
+  } else if (flower.stemHeight >= flower.maxStemHeight) {
+    flower.bloom = true; // Mark the flower as fully bloomed
+  }
+
+  // Draw the stem and bloom if applicable
   stroke(34, 139, 34);
   strokeWeight(4);
   line(flower.x, height - 20, flower.x, height - 20 - flower.stemHeight);
-  if (flower.stemHeight >= flower.maxStemHeight) flower.bloom = true;
-  if (flower.bloom && flower.petalSize < 30) flower.petalSize += 0.25;
+
+  if (flower.bloom && flower.petalSize < 30) {
+    flower.petalSize += 0.25;
+  }
+
+  // Draw petals and flower center
   if (flower.bloom) {
     noStroke();
     fill(flower.color);
@@ -107,6 +119,7 @@ function growAndDisplayFlower(flower) {
     ellipse(flower.x, height - 20 - flower.stemHeight, 20);
   }
 }
+
 function playNextFlowerSound(time) {
   if (flowers.length > 0) {
     let flower = flowers.shift(); // Get the next flower
@@ -117,10 +130,19 @@ function playNextFlowerSound(time) {
     let noteIndex = floor(map(r, 0, 255, 0, scale.length));
     let note = scale[noteIndex];
     let volume = map(g, 0, 255, -20, -5);
-    synth.triggerAttackRelease(note, "2n", time, Tone.dbToGain(volume));
+
+    // Check if the current time is greater than the last note time
+    if (time > lastNoteTime) {
+      // Play the note and update lastNoteTime
+      synth.triggerAttackRelease(note, "2n", time, Tone.dbToGain(volume));
+      lastNoteTime = time; // Update the last note time
+    }
+
     flowers.push(flower); // Recycle flower for future sounds
+    console.log("Current time:", time, "Last note time:", lastNoteTime);
   }
 }
+
 // Median color and lullaby generation
 function drawMedianColorCircle() {
   if (selectedMedianColor) {
@@ -168,6 +190,8 @@ function getMedianFlowerColor(flowers) {
   return medianColor;
 }
 // Update flower growth and lullaby generation
+let flowerGrowthCounter = 0; // Counter to track when to calculate median color
+
 function handleFlowerGrowthAndSounds() {
   if (
     rainRate > 0 &&
@@ -176,17 +200,27 @@ function handleFlowerGrowthAndSounds() {
   ) {
     addFlower();
     nextFlowerTime = millis() + flowerInterval;
-    // Only generate a lullaby if we have at least 5 flowers
-    if (flowers.length >= 5) {
-      selectedMedianColor = getMedianFlowerColor(flowers);
+    flowerGrowthCounter++; // Increment counter every time a new flower grows
+
+    // Play a note when each of the first 4 flowers grows
+    if (flowerGrowthCounter <= 4) {
+      playNextFlowerSound(Tone.now());
+    }
+
+    // Select median color at multiples of 5 for the last 5 flowers
+    if (flowerGrowthCounter % 5 === 0 && flowers.length >= 5) {
+      selectedMedianColor = getMedianFlowerColor(flowers.slice(-5));
       generateLullabyFromColor(selectedMedianColor);
     }
   }
+
   for (let flower of flowers) {
     growAndDisplayFlower(flower);
   }
+
   drawMedianColorCircle(); // Display the circle for the selected median color
 }
+
 const eMinorScale = ["E4", "F#4", "G4", "A4", "B4", "C5", "D5", "E5"]; // Define the E minor scale
 const minorScale = ["C4", "D4", "D#4", "F4", "G4", "G#4", "A#4", "C5"];
 function generateLullabyFromColor(color) {
@@ -212,7 +246,7 @@ function generateLullabyFromColor(color) {
   lullabyLoop = new Tone.Loop((time) => {
     const chord = progression[chordIndex % progression.length];
     for (const note of chord) {
-      synth.triggerAttackRelease(note, "4n", time);
+      synth.triggerAttackRelease(note, "2n", time);
     }
     chordIndex++;
   }, interval);
