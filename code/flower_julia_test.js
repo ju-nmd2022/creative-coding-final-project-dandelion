@@ -35,8 +35,8 @@ function setup() {
   // Initialize clouds and stars
   for (let i = 0; i < numClouds; i++)
     clouds.push(new Cloud(random(-200, width), random(height / 4, height / 3)));
-  initializeStars(200);
-  lastSwipeTime = millis();
+  initializeStars(100);
+  lastGestureTime = millis(); // Initialize to the current time
 }
 function setupTone() {
   synth = new Tone.Synth({
@@ -61,6 +61,11 @@ function draw() {
   detectSwipeGesture(); // Controls rain intensity via hand gestures
   handleFlowerGrowthAndSounds();
   drawMedianColorCircle(); // Displays a circle for selected median color
+
+  if (millis() - lastGestureTime > 30000) {
+    // 30000 ms = 30 seconds
+    rainbowMode = true;
+  }
 }
 // Helper functions for elements in draw
 function updateAndDrawCloudsAndRain() {
@@ -268,9 +273,11 @@ function initializeStars(numStars) {
     stars.push(star);
   }
 }
+
 function updateAndDrawStars() {
   noStroke();
   fill(255);
+
   for (let i = 0; i < stars.length; i++) {
     let star = stars[i];
     let twinkleFactor = map(
@@ -289,21 +296,34 @@ function updateAndDrawStars() {
     );
   }
 }
+
 function drawGradientBackground() {
+  let topColor = color(10, 13, 42); // Dark navy blue for the night sky
+  let bottomColor = color(45, 60, 90); // Lighter blue towards the bottom
+
   for (let y = 0; y < height; y++) {
     let inter = map(y, 0, height, 0, 1);
-    let c = lerpColor(color(10, 13, 42), color(45, 60, 90), inter);
+    let c = lerpColor(topColor, bottomColor, inter);
     stroke(c);
     line(0, y, width, y);
   }
 }
+
 function drawMoon(x, y, radius) {
   noStroke();
-  fill(255, 255, 204);
+
+  fill(255, 255, 204); // Light yellow for the moon
   ellipse(x, y, radius, radius);
-  fill(45, 60, 90);
-  ellipse(x - radius / 6, y - radius / 6, radius * 0.75, radius * 0.75);
+
+  // Create crescent effect by using background color to simulate shadow
+  let topColor = color(10, 13, 42);
+  let bottomColor = color(45, 60, 90);
+  let inter = map(y, 0, height, 0, 1);
+  let bgColor = lerpColor(topColor, bottomColor, inter);
+  fill(bgColor); // Fill shadow with the background color
+  ellipse(x + radius * 0.2, y, radius * 0.9, radius); // Crescent shadow
 }
+
 class Cloud {
   constructor(x, y) {
     this.x = x;
