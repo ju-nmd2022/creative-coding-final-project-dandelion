@@ -23,12 +23,13 @@ let lastNoteTime = 0; // Initialize a variable to track the last note time
 
 function preload() {
   handpose = ml5.handPose();
+  Tone.start().then(setupTone); // Initialize Tone.js audio context
 }
 function setup() {
   createCanvas(800, 600);
   pixelDensity(1);
   frameRate(60);
-  Tone.start().then(setupTone); // Initialize Tone.js audio context
+
   // Webcam and hand tracking setup
   video = createCapture(VIDEO);
   video.size(640, 480);
