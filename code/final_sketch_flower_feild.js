@@ -20,6 +20,7 @@ let synth, melodyInterval, lullabyLoop; // Tone.js elements
 const scale = ["C4", "D4", "E4", "G4", "A4"];
 let selectedMedianColor = null;
 let lastNoteTime = 0; // Initialize a variable to track the last note time
+
 function preload() {
   handpose = ml5.handPose();
 }
@@ -130,26 +131,12 @@ function growAndDisplayFlower(flower) {
   }
 }
 
-function playNextFlowerSound(time) {
-  if (flowers.length > 0) {
-    let flower = flowers.shift(); // Get the next flower
-    let flowerColor = flower.color;
-    let r = red(flowerColor);
-    let g = green(flowerColor);
-    let b = blue(flowerColor);
-    let noteIndex = floor(map(r, 0, 255, 0, scale.length));
-    let note = scale[noteIndex];
-    let volume = map(g, 0, 255, -20, -5);
-
-    // Check if the current time is greater than the last note time
-    if (time > lastNoteTime) {
-      // Play the note and update lastNoteTime
-      synth.triggerAttackRelease(note, "2n", time, Tone.dbToGain(volume));
-      lastNoteTime = time; // Update the last note time
-    }
-
-    flowers.push(flower); // Recycle flower for future sounds
-    console.log("Current time:", time, "Last note time:", lastNoteTime);
+function playNextFlowerSound() {
+  if (synth) {
+    // Ensure synth is defined
+    synth.triggerAttackRelease("C4", "8n"); // Use the desired note and duration
+  } else {
+    console.error("Synth is not initialized");
   }
 }
 
