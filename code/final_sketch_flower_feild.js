@@ -413,3 +413,9 @@ function playNextFlowerSound(time) {
   const randomNote = scale[floor(random(scale.length))];
   synth.triggerAttackRelease(randomNote, "8n", time);
 }
+function startAudioContext() {
+  Tone.start().then(() => {
+    console.log("AudioContext started successfully.");
+    setupTone(); // Now it’s safe to initialize Tone.js synths and loops
+  });
+}
