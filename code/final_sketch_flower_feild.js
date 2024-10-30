@@ -10,36 +10,46 @@ let video,
 let previousX = 0;
 let rainRate = 0;
 let lastSwipeTime = 0;
-let lastGestureTime = 0; // Track the last time a gesture was detected
+let lastGestureTime = 0;
 let rainbowMode = false;
 let sunRotationAngle = 0;
 const maxFlowers = 30;
 let nextFlowerTime = 0;
 let flowerInterval = 2000;
-let synth, melodyInterval, lullabyLoop; // Tone.js elements
+let synth, melodyInterval, lullabyLoop;
 const scale = ["C4", "D4", "E4", "G4", "A4"];
 let selectedMedianColor = null;
-let lastNoteTime = 0; // Initialize a variable to track the last note time
+let lastNoteTime = 0;
 
 function preload() {
   handpose = ml5.handPose();
-  Tone.start().then(setupTone); // Initialize Tone.js audio context
 }
 function setup() {
+  Tone.start().then(setupTone); // Initialize Tone.js audio context
   createCanvas(800, 600);
   pixelDensity(1);
   frameRate(60);
 
-  // Webcam and hand tracking setup
+  // Start Tone.js context on user interaction
+  document.addEventListener("click", async () => {
+    if (Tone.context.state !== "running") {
+      await Tone.start();
+      setupTone();
+      console.log("Audio context started");
+    }
+  });
+
+  // Rest of your setup code
   video = createCapture(VIDEO);
   video.size(640, 480);
   video.hide();
   handpose.detectStart(video, getHandsData);
-  // Initialize clouds and stars
-  for (let i = 0; i < numClouds; i++)
+
+  for (let i = 0; i < numClouds; i++) {
     clouds.push(new Cloud(random(-200, width), random(height / 4, height / 3)));
+  }
   initializeStars(100);
-  lastGestureTime = millis(); // Initialize to the current time
+  lastGestureTime = millis();
 }
 function setupTone() {
   synth = new Tone.Synth({
@@ -64,7 +74,6 @@ function draw() {
   }
   detectSwipeGesture(); // Controls rain intensity via hand gestures
   handleFlowerGrowthAndSounds();
-  drawMedianColorCircle(); // Displays a circle for selected median color
 
   // Check for inactivity to toggle rainbow mode
   if (millis() - lastGestureTime > 30000) {
@@ -132,23 +141,6 @@ function growAndDisplayFlower(flower) {
   }
 }
 
-function playNextFlowerSound() {
-  if (synth) {
-    // Ensure synth is defined
-    synth.triggerAttackRelease("C4", "8n"); // Use the desired note and duration
-  } else {
-    console.error("Synth is not initialized");
-  }
-}
-
-// Median color and lullaby generation
-function drawMedianColorCircle() {
-  if (selectedMedianColor) {
-    noStroke();
-    //fill(selectedMedianColor);
-    //ellipse(100, 100, 100, 100);
-  }
-}
 function getMedianFlowerColor(flowers) {
   if (flowers.length === 0) return color(255);
   // Limit to the last 5 flowers
@@ -204,8 +196,6 @@ function handleFlowerGrowthAndSounds() {
   for (let flower of flowers) {
     growAndDisplayFlower(flower);
   }
-
-  drawMedianColorCircle(); // Display the circle for the selected median color
 }
 
 const eMinorScale = ["E4", "F#4", "G4", "A4", "B4", "C5", "D5", "E5"]; // Define the E minor scale
@@ -401,9 +391,3 @@ function playNextFlowerSound(time) {
   const randomNote = scale[floor(random(scale.length))];
   synth.triggerAttackRelease(randomNote, "8n", time);
 }
-/*function startAudioContext() {
-  Tone.start().then(() => {
-    console.log("AudioContext started successfully.");
-    setupTone(); // Now it’s safe to initialize Tone.js synths and loops
-  });
-}*/
