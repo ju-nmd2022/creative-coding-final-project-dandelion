@@ -25,12 +25,12 @@ function preload() {
   handpose = ml5.handPose();
 }
 function setup() {
-  Tone.start().then(setupTone); // Initialize Tone.js audio context
+  Tone.start().then(setupTone);
   createCanvas(800, 600);
   pixelDensity(1);
   frameRate(60);
 
-  // Start Tone.js context on user interaction
+  // Start Tone.js
   document.addEventListener("click", async () => {
     if (Tone.context.state !== "running") {
       await Tone.start();
@@ -39,7 +39,7 @@ function setup() {
     }
   });
 
-  // Rest of your setup code
+  // Rest of setup code
   video = createCapture(VIDEO);
   video.size(640, 480);
   video.hide();
@@ -61,29 +61,25 @@ function setupTone() {
   Tone.Transport.bpm.value = 60;
   melodyInterval.start(0);
 }
-// Main draw loop
 
+// Main draw loop
 function draw() {
-  // Toggle background and star effects based on rainbow mode
   rainbowMode ? drawGradientBackground() : background(114, 188, 212);
-  // Display elements
   updateAndDrawCloudsAndRain();
   if (rainbowMode) {
     drawMoon(width * 0.7, height * 0.4, 80);
     updateAndDrawStars();
   }
-  detectSwipeGesture(); // Controls rain intensity via hand gestures
+  detectSwipeGesture();
   handleFlowerGrowthAndSounds();
 
-  // Check for inactivity to toggle rainbow mode
   if (millis() - lastGestureTime > 30000) {
-    rainbowMode = true; // Activate rainbow mode after 30 seconds of inactivity
+    rainbowMode = true;
   }
 }
-// Helper functions for elements in draw
+
 function updateAndDrawCloudsAndRain() {
   if (!rainbowMode) {
-    // Only update and draw clouds and rain if rainbowMode is false
     for (let cloud of clouds) {
       cloud.update();
       cloud.display();
@@ -97,7 +93,7 @@ function updateAndDrawCloudsAndRain() {
     zOffset += 0.001;
   }
 }
-// Flower management
+
 function addFlower() {
   flowers.push({
     x: random(50, width - 50),
@@ -109,7 +105,6 @@ function addFlower() {
   });
 }
 function growAndDisplayFlower(flower) {
-  // Remove the growth tone setup and volume control
   if (flower.stemHeight < flower.maxStemHeight) {
     flower.stemHeight += 1;
   } else if (flower.stemHeight >= flower.maxStemHeight) {
@@ -125,7 +120,6 @@ function growAndDisplayFlower(flower) {
     flower.petalSize += 0.25;
   }
 
-  // Draw petals and flower center
   if (flower.bloom) {
     noStroke();
     fill(flower.color);
@@ -168,8 +162,8 @@ function getMedianFlowerColor(flowers) {
   );
   return medianColor;
 }
-// Update flower growth and lullaby generation
-let flowerGrowthCounter = 0; // Counter to track when to calculate median color
+
+let flowerGrowthCounter = 0;
 
 function handleFlowerGrowthAndSounds() {
   if (
@@ -179,9 +173,8 @@ function handleFlowerGrowthAndSounds() {
   ) {
     addFlower();
     nextFlowerTime = millis() + flowerInterval;
-    flowerGrowthCounter++; // Increment counter every time a new flower grows
+    flowerGrowthCounter++;
 
-    // Play a note when each of the first 4 flowers grows
     if (flowerGrowthCounter <= 4) {
       playNextFlowerSound(Tone.now());
     }
@@ -270,8 +263,8 @@ function updateAndDrawStars() {
 }
 
 function drawGradientBackground() {
-  let topColor = color(10, 13, 42); // Dark navy blue for the night sky
-  let bottomColor = color(45, 60, 90); // Lighter blue towards the bottom
+  let topColor = color(10, 13, 42);
+  let bottomColor = color(45, 60, 90);
 
   for (let y = 0; y < height; y++) {
     let inter = map(y, 0, height, 0, 1);
@@ -284,16 +277,15 @@ function drawGradientBackground() {
 function drawMoon(x, y, radius) {
   noStroke();
 
-  fill(255, 255, 204); // Light yellow for the moon
+  fill(255, 255, 204);
   ellipse(x, y, radius, radius);
 
-  // Create crescent effect by using background color to simulate shadow
   let topColor = color(10, 13, 42);
   let bottomColor = color(45, 60, 90);
   let inter = map(y, 0, height, 0, 1);
   let bgColor = lerpColor(topColor, bottomColor, inter);
-  fill(bgColor); // Fill shadow with the background color
-  ellipse(x + radius * 0.2, y, radius * 0.9, radius); // Crescent shadow
+  fill(bgColor);
+  ellipse(x + radius * 0.2, y, radius * 0.9, radius);
 }
 
 class Cloud {
@@ -377,14 +369,13 @@ function detectSwipeGesture() {
 
     if (swipeDistance > 30) {
       rainRate = map(swipeDistance, 30, 100, 2, 10);
-      lastGestureTime = millis(); // Update last gesture time
-      rainbowMode = false; // Deactivate rainbow mode on swipe gesture
+      lastGestureTime = millis();
+      rainbowMode = false;
     }
 
     previousX = indexFinger.x;
   }
 
-  // Gradually decrease rain rate when there’s no movement
   rainRate = max(rainRate - 0.5, 0);
 }
 function playNextFlowerSound(time) {
